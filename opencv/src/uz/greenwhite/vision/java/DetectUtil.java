@@ -1,11 +1,12 @@
-package uz.greenwhite.vision;
+package uz.greenwhite.vision.java;
 
 import com.sun.istack.internal.NotNull;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
 import org.opencv.core.Size;
-import org.opencv.highgui.Highgui;
+import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.objdetect.CascadeClassifier;
+import uz.greenwhite.vision.common.Wrapper;
 
 import java.io.File;
 
@@ -19,17 +20,17 @@ public class DetectUtil {
                                          @NotNull Wrapper<Boolean> stepDown,
                                          int width, int imgWidth,
                                          int rightPadding, int rightStep) {
-        if ((x.val + rightPadding) > imgWidth) {
-            if ((x.val + width) > imgWidth) {
-                widthExit.val = true;
+        if ((x.value + rightPadding) > imgWidth) {
+            if ((x.value + width) > imgWidth) {
+                widthExit.value = true;
                 return false;
             }
-            x.val = (x.val - imgWidth);
-            stepDown.val = true;
-            widthExit.val = true;
+            x.value = (x.value - imgWidth);
+            stepDown.value = true;
+            widthExit.value = true;
         } else {
-            x.val += rightStep;
-            widthExit.val = false;
+            x.value += rightStep;
+            widthExit.value = false;
         }
         return true;
     }
@@ -40,19 +41,19 @@ public class DetectUtil {
                                         @NotNull Wrapper<Integer> y,
                                         int height, int imgHeight,
                                         int downPadding, int downStep) {
-        if (stepDown.val) {
-            if ((y.val + downPadding) > imgHeight) {
-                if ((y.val + height) > imgHeight) {
-                    heightExit.val = true;
+        if (stepDown.value) {
+            if ((y.value + downPadding) > imgHeight) {
+                if ((y.value + height) > imgHeight) {
+                    heightExit.value = true;
                     return false;
                 }
-                y.val += (y.val - imgHeight);
-                heightExit.val = true;
+                y.value += (y.value - imgHeight);
+                heightExit.value = true;
             } else {
-                y.val += downStep;
-                x.val = 0;
+                y.value += downStep;
+                x.value = 0;
             }
-            stepDown.val = false;
+            stepDown.value = false;
         }
         return false;
     }
@@ -87,10 +88,10 @@ public class DetectUtil {
             Wrapper<Integer> y = Wrapper.ofInt(), x = Wrapper.ofInt();
             final int rightPadding = (rightStep + width), downPadding = (downStep + height);
 
-            while (!widthExit.val || !heightExit.val) {
+            while (!widthExit.value || !heightExit.value) {
                 MatOfRect detect = new MatOfRect();
 
-                Mat img = CvUtil.cropImage(src, x.val, y.val, width, height);
+                Mat img = CvUtil.cropImage(src, x.value, y.value, width, height);
 
                 CvUtil.detectMultiScale(cascade, detect, img, cSize, cSize);
                 if (!detect.empty()) {
@@ -99,8 +100,8 @@ public class DetectUtil {
                         file = null;
                     }
                     CvUtil.rectangleDetect(img, detect);
-                    String filename = dstPath + "IMG_" + x.val + "_" + y.val + ".jpg";
-                    Highgui.imwrite(filename, img);
+                    String filename = dstPath + "IMG_" + x.value + "_" + y.value + ".jpg";
+                    Imgcodecs.imwrite(filename, img);
                 }
                 pushRightStep(x, widthExit, stepDown, width, (int) size.width, rightPadding, rightStep);
                 pushDownStep(stepDown, heightExit, x, y, height, (int) size.height, downPadding, downStep);

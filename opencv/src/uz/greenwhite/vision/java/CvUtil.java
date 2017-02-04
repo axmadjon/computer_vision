@@ -1,4 +1,4 @@
-package uz.greenwhite.vision;
+package uz.greenwhite.vision.java;
 
 import com.sun.istack.internal.NotNull;
 import org.opencv.core.*;
@@ -47,7 +47,7 @@ public class CvUtil {
             } else {
                 bestFoundObjects++;
             }
-            Core.rectangle(src, rect.tl(), rect.br(), scalar);
+            Imgproc.rectangle(src, rect.tl(), rect.br(), scalar);
         }
         System.out.println("Found Objects BEST:" + bestFoundObjects + ", Neutral:" + neutralObjects);
     }
