@@ -4,10 +4,11 @@ import com.sun.istack.internal.NotNull;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
 import org.opencv.core.Size;
+import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.objdetect.CascadeClassifier;
 import uz.greenwhite.vision.common.Wrapper;
 
-import java.util.ArrayList;
+import java.io.File;
 
 public class DetectUtil {
 
@@ -60,37 +61,50 @@ public class DetectUtil {
     //------------------------------------------------------------------------------------------------------------------
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    public static void detectStepByStep(CascadeClassifier cascade,
-                                        ArrayList<RectDetect> detects,
-                                        Mat src, int size) {
-        for (int i = 0; i < 4; i++) {
-            int resize = (i + 1) * 100;
+    public static void detectStepByStep(@NotNull CascadeClassifier cascade,
+                                        @NotNull Mat src,
+                                        @NotNull String dstPath,
+                                        int width, int height) {
+        if (src.empty()) return;
 
-            if (size < resize) return;
+        for (int i = 0; i < 2; i++) {
+            int cSize = (i + 1) * 200;
 
-            Size s = src.size();
-            if (Math.max(s.width, s.height) < size) {
+            if (width < cSize || height < cSize) return;
+
+            if (dstPath == null || dstPath.trim().length() <= 0) throw new RuntimeException("path dst images is empty");
+
+            Size size = src.size();
+            if (size.width < width || size.height < height) {
                 return;
             }
+            if (!dstPath.endsWith("\\")) dstPath = dstPath + "\\";
+
+            File file = new File(dstPath = (String.format("%sIMG_%d_%dx%d\\", dstPath, cSize, width, height)));
+            if (!dstPath.endsWith("\\")) dstPath = dstPath + "\\";
 
             final Wrapper<Boolean> stepDown = Wrapper.ofBool(), widthExit = Wrapper.ofBool(), heightExit = Wrapper.ofBool();
-            int downStep = (size / 3), rightStep = (size / 3);
+            int downStep = (width / 3), rightStep = (height / 3);
             Wrapper<Integer> y = Wrapper.ofInt(), x = Wrapper.ofInt();
-            final int rightPadding = (rightStep + size), downPadding = (downStep + size);
+            final int rightPadding = (rightStep + width), downPadding = (downStep + height);
 
             while (!widthExit.value || !heightExit.value) {
                 MatOfRect detect = new MatOfRect();
 
-                Mat img = CvUtil.cropImage(src, x.value, y.value, size);
+                Mat img = CvUtil.cropImage(src, x.value, y.value, width, height);
 
-                CvUtil.detectMultiScale(cascade, detect, img, resize);
-
+                CvUtil.detectMultiScale(cascade, detect, img, cSize, cSize);
                 if (!detect.empty()) {
-                    detects.add(new RectDetect(x.value, y.value, size, resize, detect.toArray()));
+                    if (file != null) {
+                        file.mkdirs();
+                        file = null;
+                    }
+                    CvUtil.rectangleDetect(img, detect);
+                    String filename = dstPath + "IMG_" + x.value + "_" + y.value + ".jpg";
+                    Imgcodecs.imwrite(filename, img);
                 }
-
-                pushRightStep(x, widthExit, stepDown, size, (int) s.width, rightPadding, rightStep);
-                pushDownStep(stepDown, heightExit, x, y, size, (int) s.height, downPadding, downStep);
+                pushRightStep(x, widthExit, stepDown, width, (int) size.width, rightPadding, rightStep);
+                pushDownStep(stepDown, heightExit, x, y, height, (int) size.height, downPadding, downStep);
             }
         }
     }

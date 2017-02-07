@@ -1,24 +1,46 @@
-package uz.greenwhite.vision.java;
+package uz.greenwhite.vision;
 
 import com.sun.istack.internal.NotNull;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
 import org.opencv.core.Size;
 import org.opencv.objdetect.CascadeClassifier;
+import uz.greenwhite.thread.JobManager;
 import uz.greenwhite.vision.common.Wrapper;
 
 import java.util.ArrayList;
 
 public class DetectUtil {
+    /*
+    *     private static boolean checkPointRadius(int p1, int r1r, int p2, int r2r) {
+        int p1Min = p1 - r1r, p1Max = p1 + r1r;
+        int p2Min = p2 - r2r, p2Max = p2 + r2r;
+        return (p1Min < p2 || p1Min < p2Max) && (p1Max > p2 || p1Max > p2Min);
+    }
+
+    public static boolean checkRectRadius(Rect r1, int r1r, Rect r2, int r2r) {
+        int xR1Min = r1.x - r1r, xR1Max = r1.x + r1r;
+        int xR2Min = r2.x - r2r, xR2Max = r2.x + r2r;
+
+        int yR1Min = r1.y - r1r, yR1Max = r1.y + r1r;
+        int yR2Min = r2.y - r2r, yR2Max = r2.y + r2r;
+
+        //      rect.x with round check
+        return (xR1Min < r2.x || xR1Min < xR2Max) &&
+                (xR1Max > r2.x || xR1Max > xR2Min) &&
+                //rect.y with round check
+                (yR1Min < r2.y || yR1Min < yR2Max) &&
+                (yR1Max > r2.y || yR1Max > yR2Min);
+    * */
 
     private DetectUtil() {
     }
 
-    private static boolean pushRightStep(@NotNull Wrapper<Integer> x,
-                                         @NotNull Wrapper<Boolean> widthExit,
-                                         @NotNull Wrapper<Boolean> stepDown,
-                                         int width, int imgWidth,
-                                         int rightPadding, int rightStep) {
+    static boolean pushRightStep(@NotNull Wrapper<Integer> x,
+                                 @NotNull Wrapper<Boolean> widthExit,
+                                 @NotNull Wrapper<Boolean> stepDown,
+                                 int width, int imgWidth,
+                                 int rightPadding, int rightStep) {
         if ((x.value + rightPadding) > imgWidth) {
             if ((x.value + width) > imgWidth) {
                 widthExit.value = true;
@@ -34,12 +56,12 @@ public class DetectUtil {
         return true;
     }
 
-    private static boolean pushDownStep(@NotNull Wrapper<Boolean> stepDown,
-                                        @NotNull Wrapper<Boolean> heightExit,
-                                        @NotNull Wrapper<Integer> x,
-                                        @NotNull Wrapper<Integer> y,
-                                        int height, int imgHeight,
-                                        int downPadding, int downStep) {
+    static boolean pushDownStep(@NotNull Wrapper<Boolean> stepDown,
+                                @NotNull Wrapper<Boolean> heightExit,
+                                @NotNull Wrapper<Integer> x,
+                                @NotNull Wrapper<Integer> y,
+                                int height, int imgHeight,
+                                int downPadding, int downStep) {
         if (stepDown.value) {
             if ((y.value + downPadding) > imgHeight) {
                 if ((y.value + height) > imgHeight) {
@@ -57,9 +79,8 @@ public class DetectUtil {
         return false;
     }
 
-    //------------------------------------------------------------------------------------------------------------------
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
+    /*@SuppressWarnings("ResultOfMethodCallIgnored")
     public static void detectStepByStep(CascadeClassifier cascade,
                                         ArrayList<RectDetect> detects,
                                         Mat src, int size) {
@@ -93,5 +114,5 @@ public class DetectUtil {
                 pushDownStep(stepDown, heightExit, x, y, size, (int) s.height, downPadding, downStep);
             }
         }
-    }
+    }*/
 }
