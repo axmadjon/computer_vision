@@ -8,9 +8,13 @@ import org.opencv.features2d.FeatureDetector;
 import org.opencv.features2d.Features2d;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.objdetect.CascadeClassifier;
+import org.opencv.videoio.VideoCapture;
+import org.opencv.videoio.Videoio;
 import uz.greenwhite.vision.Util;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -49,8 +53,8 @@ public class TestMain {
     }
 
     public static void main(String[] args) {
-        detect(null);
-        /*String lbp = "e:\\install\\computer_vision\\opencv_2\\opencv\\build\\etc\\lbpcascades\\lbpcascade_frontalcatface.xml";
+        //detect(null);
+        String lbp = "e:\\install\\computer_vision\\opencv_2\\opencv\\build\\etc\\lbpcascades\\lbpcascade_frontalcatface.xml";
         String haar = "e:\\install\\computer_vision\\opencv_2\\opencv\\build\\etc\\haarcascades\\haarcascade_frontalcatface.xml";
         String myCascade = "e:\\gws_project\\opncv_train_cascade\\lbp_cascade\\cascade.xml";
         CascadeClassifier cascade = new CascadeClassifier(myCascade);
@@ -62,14 +66,14 @@ public class TestMain {
         MatOfRect detect = new MatOfRect();
         if (video.open(0)) {
             int videoSize = 600;
-            int padding = 3;
+            int padding = 2;
             video.set(Videoio.CAP_PROP_FRAME_WIDTH, videoSize);
             video.set(Videoio.CAP_PROP_FRAME_HEIGHT, videoSize);
             int i = 0;
             Mat vidImg = new Mat();
             Mat gray = new Mat();
             ArrayList<Rect> lastRects = new ArrayList<>();
-            while (i < 200) {
+            while (i < 1000) {
                 if (video.read(vidImg)) {
                     Core.flip(vidImg, vidImg, 1);
 
@@ -88,10 +92,10 @@ public class TestMain {
                             Imgproc.rectangle(vidImg, rect.tl(), rect.br(), new Scalar(0, 255, 0));
                             //Imgproc.rectangle(gray, r.tl(), r.br(), new Scalar(0, 255, 0));
 
-                            if (checkRadius(lastRects, rect, vidImg)) {
+                           /* if (checkRadius(lastRects, rect, vidImg)) {
                                 video.release();
                                 return;
-                            }
+                            }*/
                         }
                     }
                     img.showImage(vidImg);
@@ -104,7 +108,8 @@ public class TestMain {
             System.out.println("success open video");
         } else {
             System.out.println("can't open video");
-        }*/
+        }
+
        /* if (img.Window.isActive()) {
             img.close();
         }*/
