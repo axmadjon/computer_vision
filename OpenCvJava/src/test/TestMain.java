@@ -58,6 +58,8 @@ public class TestMain {
         String haar = "e:\\install\\computer_vision\\opencv_2\\opencv\\build\\etc\\haarcascades\\haarcascade_frontalcatface.xml";
         String myCascade = "e:\\gws_project\\opncv_train_cascade\\lbp_cascade\\cascade.xml";
         CascadeClassifier cascade = new CascadeClassifier(myCascade);
+
+        CascadeClassifier cascadeLogo = new CascadeClassifier("e:\\logo_test\\haarcascade\\cascade.xml");
         Imshow img = new Imshow("img");
         //Imshow grayImg = new Imshow("grayIg");
 
@@ -73,9 +75,9 @@ public class TestMain {
             Mat vidImg = new Mat();
             Mat gray = new Mat();
             ArrayList<Rect> lastRects = new ArrayList<>();
-            while (i < 1000) {
+            while (i < 2000) {
                 if (video.read(vidImg)) {
-                    Core.flip(vidImg, vidImg, 1);
+                    // Core.flip(vidImg, vidImg, 1);
 
                     Imgproc.resize(vidImg, gray, new Size(vidImg.width() / padding, vidImg.height() / padding));
                     Imgproc.cvtColor(gray, gray, Imgproc.COLOR_RGB2GRAY);
@@ -88,8 +90,9 @@ public class TestMain {
                             int w = r.width * padding, h = r.height * padding;
 
                             Rect rect = new Rect(x, y, w, h);
-                            System.out.println(rect.toString());
-                            Imgproc.rectangle(vidImg, rect.tl(), rect.br(), new Scalar(0, 255, 0));
+                            if (detectLogo(rect, vidImg, cascadeLogo)) {
+                                Imgproc.rectangle(vidImg, rect.tl(), rect.br(), new Scalar(0, 0, 255));
+                            }
                             //Imgproc.rectangle(gray, r.tl(), r.br(), new Scalar(0, 255, 0));
 
                            /* if (checkRadius(lastRects, rect, vidImg)) {
@@ -131,6 +134,18 @@ public class TestMain {
         Imgcodecs.imwrite("E:\\z_result\\result.jpg", imread);
 
         System.out.println("end:" + (System.nanoTime() - start));*/
+    }
+
+    private static boolean detectLogo(Rect rect, Mat mat, CascadeClassifier cascadeLogo) {
+        Mat clone = mat.clone();
+        Mat obj = new Mat(clone, rect);
+        MatOfRect detect = new MatOfRect();
+        cascadeLogo.detectMultiScale(obj, detect);
+        if (!detect.empty()) {
+            Imgproc.putText(mat, "PEPSI", rect.tl(), Imgproc.CC_STAT_AREA, 1, new Scalar(0, 255, 0));
+            return true;
+        }
+        return false;
     }
 
     private static void detect(Mat mat) {
