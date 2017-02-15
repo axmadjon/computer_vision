@@ -116,24 +116,6 @@ public class TestMain {
        /* if (img.Window.isActive()) {
             img.close();
         }*/
-        /*String cascadePath = "e:\\gws_project\\opncv_train_cascade\\haarcascade2\\cascade.xml";
-        String path = "E:\\image\\opencv\\bottle\\find_object\\20161229_181238.jpg";
-
-        ArrayList<Rect> result = new ArrayList<>();
-        long start = System.nanoTime();
-        try {
-            result = ObjectDetect.detect(cascadePath, path);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        Mat imread = Imgcodecs.imread(path);
-        Scalar scalar = new Scalar(0, 255, 0);
-        for (Rect r : result) {
-            Imgproc.rectangle(imread, r.tl(), r.br(), scalar);
-        }
-        Imgcodecs.imwrite("E:\\z_result\\result.jpg", imread);
-
-        System.out.println("end:" + (System.nanoTime() - start));*/
     }
 
     private static boolean detectLogo(Rect rect, Mat mat, CascadeClassifier cascadeLogo) {

@@ -1,10 +1,11 @@
 package uz.greenwhite.vision;
 
 import com.sun.istack.internal.NotNull;
+import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Rect;
 import org.opencv.core.Size;
-import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.highgui.Highgui;
 import org.opencv.objdetect.CascadeClassifier;
 
 import java.io.FileNotFoundException;
@@ -23,7 +24,9 @@ public class ObjectDetect {
             throws NullPointerException, FileNotFoundException {
         checkParameter(cascade, img);
 
-        Mat src = Imgcodecs.imread(img, Imgcodecs.CV_LOAD_IMAGE_COLOR);
+        Mat src = Highgui.imread(img, Highgui.CV_LOAD_IMAGE_COLOR);
+        Core.transpose(src,src);
+        Core.flip(src,src,1);
         if (src.empty()) throw new FileNotFoundException(String.format("image not found [%s]", img));
 
         CascadeClassifier classifier = new CascadeClassifier(cascade);
