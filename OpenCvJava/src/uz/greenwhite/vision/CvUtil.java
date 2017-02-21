@@ -47,4 +47,32 @@ public class CvUtil {
         result.copyTo(crop);
         return crop;
     }
+
+
+    public static void resizeByWidth(@NotNull Mat src, @NotNull Mat dst, int size) {
+        if (size == 0) throw new RuntimeException("size == 0");
+        Size s = src.size();
+        if (s.width < size) return;
+
+        double resizePercent = 100 - ((size * 100) / s.width);
+        int h = (int) Math.round(s.height - ((s.height / 100) * resizePercent));
+        Imgproc.resize(src, dst, new Size(size, h));
+    }
+
+    public static void resizeByHeight(@NotNull Mat src, @NotNull Mat dst, int size) {
+        if (size == 0) throw new RuntimeException("size == 0");
+        Size s = src.size();
+        if (s.height < size) return;
+
+        double resizePercent = 100 - ((size * 100) / s.height);
+
+        int w = (int) Math.round(s.width - ((s.width / 100) * resizePercent));
+        Imgproc.resize(src, dst, new Size(w, size));
+    }
+
+    public static void resizeByMaximum(@NotNull Mat src, @NotNull Mat dst, int size) {
+        Size s = src.size();
+        if (s.width > s.height) resizeByWidth(src, dst, size);
+        else resizeByHeight(src, dst, size);
+    }
 }

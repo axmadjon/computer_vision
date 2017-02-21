@@ -11,6 +11,7 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
 import org.opencv.videoio.VideoCapture;
 import org.opencv.videoio.Videoio;
+import uz.greenwhite.vision.CvUtil;
 import uz.greenwhite.vision.Util;
 
 import java.lang.reflect.Field;
@@ -56,11 +57,12 @@ public class TestMain {
         //detect(null);
         String lbp = "e:\\install\\computer_vision\\opencv_2\\opencv\\build\\etc\\lbpcascades\\lbpcascade_frontalcatface.xml";
         String haar = "e:\\install\\computer_vision\\opencv_2\\opencv\\build\\etc\\haarcascades\\haarcascade_frontalcatface.xml";
-        String myCascade = "e:\\gws_project\\opncv_train_cascade\\lbp_cascade\\cascade.xml";
+        String myCascade = "e:\\z_hog_train\\lbpcascade\\cascade.xml";
         CascadeClassifier cascade = new CascadeClassifier(myCascade);
 
         CascadeClassifier cascadeLogo = new CascadeClassifier("e:\\logo_test\\haarcascade\\cascade.xml");
         Imshow img = new Imshow("img");
+        Imshow imgLogo = new Imshow("imgLogo");
         //Imshow grayImg = new Imshow("grayIg");
 
         VideoCapture video = new VideoCapture();
@@ -90,7 +92,7 @@ public class TestMain {
                             int w = r.width * padding, h = r.height * padding;
 
                             Rect rect = new Rect(x, y, w, h);
-                            if (detectLogo(rect, vidImg, cascadeLogo)) {
+                            if (detectLogo(imgLogo, rect, vidImg, cascadeLogo)) {
                                 Imgproc.rectangle(vidImg, rect.tl(), rect.br(), new Scalar(0, 0, 255));
                             }
                             //Imgproc.rectangle(gray, r.tl(), r.br(), new Scalar(0, 255, 0));
@@ -118,15 +120,23 @@ public class TestMain {
         }*/
     }
 
-    private static boolean detectLogo(Rect rect, Mat mat, CascadeClassifier cascadeLogo) {
+    private static boolean detectLogo(Imshow logoDetect, Rect rect, Mat mat, CascadeClassifier cascadeLogo) {
         Mat clone = mat.clone();
         Mat obj = new Mat(clone, rect);
         MatOfRect detect = new MatOfRect();
+        CvUtil.resizeByMaximum(obj, obj, 200);
         cascadeLogo.detectMultiScale(obj, detect);
         if (!detect.empty()) {
-            Imgproc.putText(mat, "PEPSI", rect.tl(), Imgproc.CC_STAT_AREA, 1, new Scalar(0, 255, 0));
+            Scalar scalar = new Scalar(0, 255, 0);
+            Rect[] rects = detect.toArray();
+            for (Rect r : rects) {
+                Imgproc.rectangle(obj, r.tl(), r.br(), scalar);
+            }
+            if (logoDetect != null) logoDetect.showImage(obj);
+            Imgproc.putText(mat, "PEPSI", rect.tl(), Imgproc.CC_STAT_AREA, 1, scalar);
             return true;
         }
+        if (logoDetect != null) logoDetect.showImage(obj);
         return false;
     }
 

@@ -1,7 +1,6 @@
 package uz.greenwhite.vision;
 
 import com.sun.istack.internal.NotNull;
-import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Rect;
 import org.opencv.core.Size;
@@ -24,25 +23,24 @@ public class ObjectDetect {
             throws NullPointerException, FileNotFoundException {
         checkParameter(cascade, img);
 
-        Mat src = Highgui.imread(img, Highgui.CV_LOAD_IMAGE_COLOR);
-        Core.transpose(src,src);
-        Core.flip(src,src,1);
+        Mat src = Highgui.imread(img, Highgui.IMREAD_GRAYSCALE);
         if (src.empty()) throw new FileNotFoundException(String.format("image not found [%s]", img));
 
         CascadeClassifier classifier = new CascadeClassifier(cascade);
         if (classifier.empty()) throw new FileNotFoundException(String.format("cascade not found [%s]", cascade));
 
+        CvUtil.resizeByMaximum(src, src, 1000);
         ArrayList<RectDetect> detects = new ArrayList<>();
 
         Size size = src.size();
-        long count = Math.round(Math.min(size.width, size.height) / 200);
-
-        long start = System.nanoTime();
-
-        for (int i = 2; i < count; i++) {
-            Detect.detectStepByStep(classifier, detects, src, (i + 1) * 200);
+        int min = (int) Math.min(size.width, size.height);
+        for (int i = 0; i < 6; i++) {
+            int cropSize = (i + 1) * 100;
+            if (cropSize < min) {
+                Detect.detectStepByStep(classifier, detects, src, cropSize);
+            } else break;
         }
-        System.out.println("end" + (System.nanoTime() - start));
+        Detect.detectStepByStep(classifier, detects, src, min);
         return make(detects);
     }
 
@@ -74,7 +72,7 @@ public class ObjectDetect {
                 ArrayList<Rect> value = r2.getValue();
                 int size = value.size();
                 for (int i = 0; i < size; i++) {
-                    if (Util.checkRectRadius(found, value.get(i))) {
+                    if (!contains && Util.checkRectRadius(found, value.get(i))) {
                         contains = true;
                         value.add(found);
                         r2.getKey().set(calculateCenter(value));
@@ -91,7 +89,8 @@ public class ObjectDetect {
 
         ArrayList<DetectOfRect> result = new ArrayList<>();
         for (Map.Entry<Rect, ArrayList<Rect>> entry : map.entrySet()) {
-            result.add(new DetectOfRect(entry.getKey(), entry.getValue()));
+            ArrayList<Rect> value = entry.getValue();
+            if (value.size() > 1) result.add(new DetectOfRect(entry.getKey(), value));
         }
 
         return result;

@@ -7,27 +7,14 @@ import uz.greenwhite.vision.common.Wrapper;
 
 import java.util.ArrayList;
 
-public class Detect {
+class Detect {
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     static void detectStepByStep(CascadeClassifier cascade,
                                  ArrayList<RectDetect> detects,
                                  Mat src, int size) {
-        ArrayList<Detect> result = new ArrayList<>();
-        for (int i = 0; i < 2; i++) {
-            int resize = (i + 1) * 200;
-
-            if (size < resize) return;
-
-            Size s = src.size();
-            if (Math.max(s.width, s.height) < size) {
-                return;
-            }
-
-            result.add(new Detect(cascade, detects, src, size, resize));
-        }
-
-        result.parallelStream().forEach(Detect::execute);
+        Detect detect = new Detect(cascade, detects, src, size, 200);
+        detect.execute();
     }
 
     //------------------------------------------------------------------------------------------------------------------
@@ -44,6 +31,8 @@ public class Detect {
         this.size = size;
         this.resize = resize;
     }
+
+    public static int id = 0;
 
     private void execute() {
         Size s = src.size();
@@ -67,13 +56,13 @@ public class Detect {
                 for (Rect r : rects) {
                     Core.rectangle(img, r.tl(), r.br(), scalar);
                 }
-                Highgui.imwrite("E:\\z_result\\test_result\\img_"
-                                + img.hashCode()
-                                + "_"
-                                + x.value + "_" + y.value
-                                + "_" + resize + "_" + this.size + "_" + rects.length + ".jpg",
-                        img);
             }
+            Highgui.imwrite("E:\\z_result\\test_result\\img_" + (id++) + "_"
+                            + img.hashCode()
+                            + "_"
+                            + x.value + "_" + y.value
+                            + "_" + resize + "_" + this.size + "_" + detect.hashCode() + "_" + (id++) + ".jpg",
+                    img);
 
             DetectUtil.pushRightStep(x, widthExit, stepDown, this.size, (int) s.width, rightPadding, rightStep);
             DetectUtil.pushDownStep(stepDown, heightExit, x, y, this.size, (int) s.height, downPadding, downStep);

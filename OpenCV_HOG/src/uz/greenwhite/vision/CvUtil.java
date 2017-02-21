@@ -25,7 +25,7 @@ public class CvUtil {
                                         int resize) {
         Size size = src.size();
         Mat gray = src.clone();
-        Imgproc.cvtColor(src, gray, Imgproc.COLOR_RGB2GRAY);
+        //Imgproc.cvtColor(src, gray, Imgproc.COLOR_RGB2GRAY);
         if (Math.max(size.width, size.height) > resize) {
             Imgproc.resize(gray, gray, new Size(resize, resize));
             Imgproc.resize(src, src, new Size(resize, resize));
@@ -46,5 +46,32 @@ public class CvUtil {
         Mat crop = new Mat();
         result.copyTo(crop);
         return crop;
+    }
+
+    public static void resizeByWidth(@NotNull Mat src, @NotNull Mat dst, int size) {
+        if (size == 0) throw new RuntimeException("size == 0");
+        Size s = src.size();
+        if (s.width < size) return;
+
+        double resizePercent = 100 - ((size * 100) / s.width);
+        int h = (int) Math.round(s.height - ((s.height / 100) * resizePercent));
+        Imgproc.resize(src, dst, new Size(size, h));
+    }
+
+    public static void resizeByHeight(@NotNull Mat src, @NotNull Mat dst, int size) {
+        if (size == 0) throw new RuntimeException("size == 0");
+        Size s = src.size();
+        if (s.height < size) return;
+
+        double resizePercent = 100 - ((size * 100) / s.height);
+
+        int w = (int) Math.round(s.width - ((s.width / 100) * resizePercent));
+        Imgproc.resize(src, dst, new Size(w, size));
+    }
+
+    public static void resizeByMaximum(@NotNull Mat src, @NotNull Mat dst, int size) {
+        Size s = src.size();
+        if (s.width > s.height) resizeByWidth(src, dst, size);
+        else resizeByHeight(src, dst, size);
     }
 }

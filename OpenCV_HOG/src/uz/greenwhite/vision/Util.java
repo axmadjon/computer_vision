@@ -7,7 +7,7 @@ public class Util {
     public static int rectRadius(Rect rect) {
         int min = Math.min(rect.width, rect.height);
         int max = Math.max(rect.width, rect.height);
-        return Math.round((((max / 4) - (min / 4)) / 2) + 30);// min
+        return Math.round((((max / 8) - (min / 8)) / 2));// + min
     }
 
     private static boolean checkPointRadius(int p1, int r1r, int p2, int r2r) {
