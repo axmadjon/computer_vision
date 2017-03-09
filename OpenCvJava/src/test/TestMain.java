@@ -53,7 +53,83 @@ public class TestMain {
 
     }
 
+    private static boolean show(Imshow img, VideoCapture video, Mat image) {
+        video.read(image);
+        Imgproc.cvtColor(image, image, Imgproc.COLOR_BGR2HSV);
+        Imgproc.threshold(image, image, 50, 100, Imgproc.THRESH_BINARY);
+        if (img.Window.isActive()) img.showImage(image);
+        return img.Window.isActive();
+    }
+
+    private static void segmentation() {
+        Imshow img = new Imshow("img");
+        Imshow img2 = new Imshow("img2");
+        Imshow img3 = new Imshow("img3");
+        Mat imread = Imgcodecs.imread("E:\\z_result\\dodge.jpg");
+
+        CvUtil.resizeByMaximum(imread, imread, 1000);
+        Mat segment = new Mat();
+        Imgproc.cvtColor(imread, segment, Imgproc.COLOR_BGR2HSV);
+        Imgproc.threshold(segment, segment, 10, 255, Imgproc.THRESH_BINARY);
+        Mat canny = new Mat();
+        Imgproc.Canny(segment, canny, 50, 100);
+        for (int i = 0; i < canny.cols(); i++) {
+            for (int j = 0; j < canny.rows(); j++) {
+                double color = canny.get(j, i)[0];
+                if (color == 255) imread.put(j, i, new double[]{0, 255, 0});
+            }
+        }
+        img.showImage(imread);
+        img2.showImage(segment);
+        img3.showImage(canny);
+
+//        VideoCapture video = new VideoCapture();
+//        if (video.open(0)) {
+//            Mat image = Mat.eye(3, 3, CvType.CV_8UC1);
+//            img.showImage(image);
+//            boolean runVideo = true;
+//            while (runVideo) {
+//                runVideo = show(img, video, image);
+//                System.out.println(img.Window.isActive());
+//            }
+//            video.release();
+//        } else {
+//            System.out.println("can't open video capture");
+//        }
+
+    }
+
+    private static int color(double[] a) {
+        return (int) (a[0] + a[1] + a[2]) / 3;
+    }
+
+    private static void generate(Mat src, Mat dst) {
+        Imgproc.cvtColor(dst, dst, Imgproc.COLOR_RGB2GRAY);
+        for (int i = 0; i < src.cols(); i++) {
+            for (int j = 0; j < src.rows(); j++) {
+                if (i <= i + 1 || j <= j + 1) return;
+
+                int a = color(src.get(j, i));
+                int b = color(src.get(j, i + 1));
+                int c = color(src.get(j + 1, i));
+                int d = color(src.get(j + 1, i + 1));
+                dst.put(j, i, Math.max(a, Math.max(b, Math.max(c, d))));
+            }
+        }
+    }
+
+    private static void main() {
+        Mat imread = Imgcodecs.imread("E:\\z_result\\found_object.jpg");
+        Size size = imread.size();
+        Mat resul = new Mat((int) size.width / 2, (int) size.height / 2, imread.type());
+        generate(imread, resul);
+        Imshow.show(resul);
+    }
+
     public static void main(String[] args) {
+        main();
+        if (true) return;
+
         //detect(null);
         String lbp = "e:\\install\\computer_vision\\opencv_2\\opencv\\build\\etc\\lbpcascades\\lbpcascade_frontalcatface.xml";
         String haar = "e:\\install\\computer_vision\\opencv_2\\opencv\\build\\etc\\haarcascades\\haarcascade_frontalcatface.xml";
@@ -69,21 +145,21 @@ public class TestMain {
 
         MatOfRect detect = new MatOfRect();
         if (video.open(0)) {
-            int videoSize = 600;
-            int padding = 2;
+            int videoSize = 1000;
+            int padding = 5;
             video.set(Videoio.CAP_PROP_FRAME_WIDTH, videoSize);
             video.set(Videoio.CAP_PROP_FRAME_HEIGHT, videoSize);
             int i = 0;
             Mat vidImg = new Mat();
             Mat gray = new Mat();
             ArrayList<Rect> lastRects = new ArrayList<>();
-            while (i < 2000) {
+            while (i < 1000) {
                 if (video.read(vidImg)) {
                     // Core.flip(vidImg, vidImg, 1);
 
                     Imgproc.resize(vidImg, gray, new Size(vidImg.width() / padding, vidImg.height() / padding));
                     Imgproc.cvtColor(gray, gray, Imgproc.COLOR_RGB2GRAY);
-                    cascade.detectMultiScale(gray, detect);
+                    cascade.detectMultiScale(gray, detect/*,1.5,4,0,new Size(),new Size()*/);
 
                     Rect[] foundRects = detect.toArray();
                     if (foundRects.length > 0) {
@@ -92,9 +168,9 @@ public class TestMain {
                             int w = r.width * padding, h = r.height * padding;
 
                             Rect rect = new Rect(x, y, w, h);
-                            if (detectLogo(imgLogo, rect, vidImg, cascadeLogo)) {
-                                Imgproc.rectangle(vidImg, rect.tl(), rect.br(), new Scalar(0, 0, 255));
-                            }
+                            //  if (detectLogo(imgLogo, rect, vidImg, cascadeLogo)) {
+                            Imgproc.rectangle(vidImg, rect.tl(), rect.br(), new Scalar(0, 0, 255));
+                            // }
                             //Imgproc.rectangle(gray, r.tl(), r.br(), new Scalar(0, 255, 0));
 
                            /* if (checkRadius(lastRects, rect, vidImg)) {
